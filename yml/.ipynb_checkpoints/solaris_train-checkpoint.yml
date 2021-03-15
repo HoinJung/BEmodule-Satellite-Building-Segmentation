@@ -1,0 +1,147 @@
+# model_name: unet
+# model_name: BE_unet
+# model_name: xdxd_BE
+# model_name: resunet
+# model_name: resunet_BE
+model_name: ternaus_BE
+# model_name: ternaus
+model_path:
+
+train: true
+infer: false
+
+pretrained: false
+nn_framework: torch
+batch_size: 8
+# ablation : True
+ablation : false
+ternaus : True
+# ternaus : false
+boundary : True
+# boundary : False
+# unet3 : True
+unet3 : False
+
+
+data_specs:
+  width: 512
+  height: 512
+#   width: 512
+#   height: 512
+#   width: 2048
+#   height: 2048
+  dtype:
+  image_type: zscore
+  rescale: false
+  rescale_minima: auto
+  rescale_maxima: auto
+  channels: 3
+  label_type: mask
+  is_categorical: false
+  mask_channels: 1
+  val_holdout_frac: 0.175
+  data_workers:
+  num_classes : 1
+  
+# aois : [2=Vegas , 3=Paris , 4=Shanghai , 5=Khartoum]
+aoi : 7
+train_csv_dir : '../csvs/'
+# training_data_csv: '../csvs/AOI_2_Vegas_train_df.csv'
+validation_data_csv:
+inference_data_csv: 
+training_augmentation:
+  augmentations:
+    RandomCrop : 
+      height : 512
+      width : 512
+      p : 1.0
+#     VerticalFlip : 
+
+#       p : 0.5
+#     HorizontalFlip : 
+
+#       p : 0.5
+#     RandomRotate90 : 
+
+#       p : 0.5
+
+  p: 1.0
+  shuffle: true
+validation_augmentation:
+  augmentations:
+    CenterCrop : 
+      height : 512
+      width : 512
+      p : 1.0
+
+  p: 1.0
+inference_augmentation:
+  augmentations:
+    p: 1.0  
+  
+training:
+  epochs: 1000
+  steps_per_epoch:
+  optimizer: Adam  
+  lr: 1e-4
+  opt_args:
+#   loss : 
+# #     bcedice:
+#     bce : 
+#   loss_weights : 
+# #     bcedice : 1
+#     bce : 1 
+#   loss_mask:
+#     bce :  
+# #     msssim :     
+#   loss_mask_weights:
+#     bce : 1
+# #     msssim : 1
+#   loss_boundary:
+#     bce :      
+#   loss_boundary_weights:
+#     bce : 1
+  
+
+  loss : 
+    focal:
+
+  loss_weights : 
+    focal : 1
+
+  loss_mask:
+    msssim :     
+  loss_mask_weights:
+    msssim : 1
+  loss_boundary:
+    bce :      
+  loss_boundary_weights:
+    bce : 1
+
+  metrics:
+    training: p
+    validation: f
+  checkpoint_frequency: 100
+  callbacks:
+    early_stopping:
+      patience: 35
+    model_checkpoint:
+      filepath: '../result/models_weight/'
+      path_aoi : 
+      monitor: val_loss
+    lr_schedule:
+      schedule_type: arbitrary
+      schedule_dict:
+#         milestones:
+#           - 5
+#           - 10
+#           - 15
+#           - 20
+#         gamma: 0.1
+#   model_dest_path: '../result/models_weight/final.pth'
+  verbose: true
+
+inference:
+  window_step_size_x:
+  window_step_size_y:
+  output_dir: 
