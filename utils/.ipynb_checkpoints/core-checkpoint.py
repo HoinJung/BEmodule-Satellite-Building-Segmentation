@@ -1,28 +1,7 @@
 import os
 import numpy as np
-from shapely.wkt import loads
-from shapely.geometry import Point
-from shapely.geometry.base import BaseGeometry
 import pandas as pd
-import geopandas as gpd
-import pyproj
-import rasterio
-from distutils.version import LooseVersion
 import skimage
-from fiona._err import CPLE_OpenFailedError
-from fiona.errors import DriverError
-from warnings import warn
-
-
-def _check_rasterio_im_load(im):
-    """Check if `im` is already loaded in; if not, load it in."""
-    if isinstance(im, str):
-        return rasterio.open(im)
-    elif isinstance(im, rasterio.DatasetReader):
-        return im
-    else:
-        raise ValueError(
-            "{} is not an accepted image format for rasterio.".format(im))
 
 
 def _check_skimage_im_load(im):
@@ -48,57 +27,6 @@ def _check_df_load(df):
     else:
         raise ValueError(f"{df} is not an accepted DataFrame format.")
 
-
-def _check_gdf_load(gdf):
-    """Check if `gdf` is already loaded in, if not, load from geojson."""
-    if isinstance(gdf, str):
-        # as of geopandas 0.6.2, using the OGR CSV driver requires some add'nal
-        # kwargs to create a valid geodataframe with a geometry column. see
-        # https://github.com/geopandas/geopandas/issues/1234
-        if gdf.lower().endswith('csv'):
-            return gpd.read_file(gdf, GEOM_POSSIBLE_NAMES="geometry",
-                                 KEEP_GEOM_COLUMNS="NO")
-        try:
-            return gpd.read_file(gdf)
-        except (DriverError, CPLE_OpenFailedError):
-            warn(f"GeoDataFrame couldn't be loaded: either {gdf} isn't a valid"
-                 " path or it isn't a valid vector file. Returning an empty"
-                 " GeoDataFrame.")
-            return gpd.GeoDataFrame()
-    elif isinstance(gdf, gpd.GeoDataFrame):
-        return gdf
-    else:
-        raise ValueError(f"{gdf} is not an accepted GeoDataFrame format.")
-
-
-def _check_geom(geom):
-    """Check if a geometry is loaded in.
-
-    Returns the geometry if it's a shapely geometry object. If it's a wkt
-    string or a list of coordinates, convert to a shapely geometry.
-    """
-    if isinstance(geom, BaseGeometry):
-        return geom
-    elif isinstance(geom, str):  # assume it's a wkt
-        return loads(geom)
-    elif isinstance(geom, list) and len(geom) == 2:  # coordinates
-        return Point(geom)
-
-
-def _check_crs(input_crs, return_rasterio=False):
-    """Convert CRS to the ``pyproj.CRS`` object passed by ``solaris``."""
-    if not isinstance(input_crs, pyproj.CRS) and input_crs is not None:
-        out_crs = pyproj.CRS(input_crs)
-    else:
-        out_crs = input_crs
-
-    if return_rasterio:
-        if LooseVersion(rasterio.__gdal_version__) >= LooseVersion("3.0.0"):
-            out_crs = rasterio.crs.CRS.from_wkt(out_crs.to_wkt())
-        else:
-            out_crs = rasterio.crs.CRS.from_wkt(out_crs.to_wkt("WKT1_GDAL"))
-
-    return out_crs
 
 
 def get_data_paths(path, infer=False):

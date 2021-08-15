@@ -78,36 +78,6 @@ class TorchFocalLoss(nn.Module):
         else:
             return F_loss
 
-    # def forward(self, outputs, targets):
-    #     """Calculate the loss function between `outputs` and `targets`.
-    #
-    #     Arguments
-    #     ---------
-    #     outputs : :class:`torch.Tensor`
-    #         The output tensor from a model.
-    #     targets : :class:`torch.Tensor`
-    #         The training target.
-    #
-    #     Returns
-    #     -------
-    #     loss : :class:`torch.Variable`
-    #         The loss value.
-    #     """
-    #     if targets.size() != outputs.size():
-    #         raise ValueError(
-    #             f"Targets and inputs must be same size. "
-    #             f"Got ({targets.size()}) and ({outputs.size()})"
-    #         )
-    #
-    #     max_val = (-outputs).clamp(min=0)
-    #     log_ = ((-max_val).exp() + (-outputs - max_val).exp()).log()
-    #     loss = outputs - outputs * targets + max_val + log_
-    #
-    #     invprobs = F.logsigmoid(-outputs * (targets * 2.0 - 1.0))
-    #     loss = self.alpha*(invprobs * self.gamma).exp() * loss
-    #
-    #     return loss.sum(dim=-1).mean()
-
 
 def torch_lovasz_hinge(logits, labels, per_image=False, ignore=None):
     """Lovasz Hinge Loss. Implementation edited from Maxim Berman's GitHub.
@@ -333,7 +303,7 @@ def soft_dice_loss(outputs, targets, per_image=False):
 
     return loss
 class MSSSIM(torch.nn.Module):
-    def __init__(self, window_size=11, size_average=True, channel=3):
+    def __init__(self, window_size=11, size_average=True, channel=1):
         super(MSSSIM, self).__init__()
         self.window_size = window_size
         self.size_average = size_average
@@ -342,13 +312,39 @@ class MSSSIM(torch.nn.Module):
     def forward(self, img1, img2):
         # TODO: store window between calls if possible
         return msssim(img1, img2, window_size=self.window_size, size_average=self.size_average)
-    
+class SSIM(torch.nn.Module):
+    def __init__(self, window_size=11, size_average=True, val_range=None):
+        super(SSIM, self).__init__()
+        self.window_size = window_size
+        self.size_average = size_average
+        self.val_range = val_range
+
+        # Assume 1 channel for SSIM
+        self.channel = 1
+        self.window = create_window(window_size)
+
+    def forward(self, img1, img2):
+        (_, channel, _, _) = img1.size()
+
+        if channel == self.channel and self.window.dtype == img1.dtype:
+            window = self.window
+        else:
+            window = create_window(self.window_size, channel).to(img1.device).type(img1.dtype)
+            self.window = window
+            self.channel = channel
+
+        return ssim(img1, img2, window=window, window_size=self.window_size, size_average=self.size_average)    
 def msssim(img1, img2, window_size=11, size_average=True, val_range=None, normalize=True):
     device = img1.device
     weights = torch.FloatTensor([0.0448, 0.2856, 0.3001, 0.2363, 0.1333]).to(device)
+
+    
+
     levels = weights.size()[0]
+    
     ssims = []
     mcs = []
+        
     for _ in range(levels):
         sim, cs = ssim(img1, img2, window_size=window_size, size_average=size_average, full=True, val_range=val_range)
 
@@ -374,7 +370,6 @@ def msssim(img1, img2, window_size=11, size_average=True, val_range=None, normal
 
     pow1 = mcs ** weights
     pow2 = ssims ** weights
-
     # From Matlab implementation https://ece.uwaterloo.ca/~z70wang/research/iwssim/
     output = torch.prod(pow1[:-1] * pow2[-1])
     return output
@@ -437,9 +432,7 @@ def create_window(window_size, channel=1):
     _1D_window = gaussian(window_size, 1.5).unsqueeze(1)
     _2D_window = _1D_window.mm(_1D_window.t()).float().unsqueeze(0).unsqueeze(0)
     window = _2D_window.expand(channel, 1, window_size, window_size).contiguous()
-    
     return window
-
 
 class BCEDiceLoss(nn.Module):
     def __init__(self, weight=None, size_average=True):
@@ -460,6 +453,24 @@ class BCEDiceLoss(nn.Module):
 
         return bce_loss + (1 - dice_coef)
 
+class BCEDiceLoss2(nn.Module):
+    def __init__(self, weight=None, size_average=True):
+        super().__init__()
+
+    def forward(self, input, target):
+
+        truth = target.view(-1)
+        pred = input.view(-1)
+#         pred = input
+        # BCE loss
+        bce_loss = nn.BCELoss()(pred, truth).double()
+        eps = 1e-5
+        # Dice Loss
+        dice_coef = (2.0 * (pred * truth).double().sum() + eps) / (
+            pred.double().sum() + truth.double().sum() + eps
+        )
+
+        return bce_loss + (1 - dice_coef)
 torch_losses = {
     'l1loss': nn.L1Loss,
     'l1': nn.L1Loss,
@@ -505,6 +516,5 @@ torch_losses = {
     'jaccardloss': TorchJaccardLoss,
     'dice': TorchDiceLoss,
     'diceloss': TorchDiceLoss
-    ,    'msssim': MSSSIM
-    ,    'bcedice': BCEDiceLoss
+    ,    'msssim': MSSSIM    ,    'bcedice': BCEDiceLoss, 'bcedice2': BCEDiceLoss2
 }

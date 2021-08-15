@@ -1,5 +1,4 @@
 import os
-from tensorflow import keras
 import torch
 from warnings import warn
 import requests
@@ -22,6 +21,7 @@ def get_model(model_name, framework, model_path=None, pretrained=False,
                              "model_name in the config file and/or provide a "
                              "custom_model_dict argument to Trainer(). ")
     if model_path is None or custom_model_dict is not None:
+        
         model_path = md.get('weight_path')
     if num_classes == 1:
         model = md.get('arch')(pretrained=pretrained)
@@ -43,19 +43,7 @@ def get_model(model_name, framework, model_path=None, pretrained=False,
 def _load_model_weights(model, path, framework):
     """Backend for loading the model."""
 
-    if framework.lower() == 'keras':
-        try:
-            model.load_weights(path)
-        except OSError:
-            # first, check to see if the weights are in the default sol dir
-            default_path = os.path.join(weights_dir, os.path.split(path)[1])
-            try:
-                model.load_weights(default_path)
-            except OSError:
-                # if they can't be found anywhere, raise the error.
-                raise FileNotFoundError("{} doesn't exist.".format(path))
-
-    elif framework.lower() in ['torch', 'pytorch']:
+    if framework.lower() in ['torch', 'pytorch']:
         # pytorch already throws the right error on failed load, so no need
         # to fix exception
         if torch.cuda.is_available():
@@ -83,27 +71,8 @@ def _load_model_weights(model, path, framework):
 
 
 def reset_weights(model, framework):
-    """Re-initialize model weights for training.
-
-    Arguments
-    ---------
-    model : :class:`tensorflow.keras.Model` or :class:`torch.nn.Module`
-        A pre-trained, compiled model with weights saved.
-    framework : str
-        The deep learning framework used. Currently valid options are
-        ``['torch', 'keras']`` .
-
-    Returns
-    -------
-    reinit_model : model object
-        The model with weights re-initialized. Note this model object will also
-        lack an optimizer, loss function, etc., which will need to be added.
-    """
-
-    if framework == 'keras':
-        model_json = model.to_json()
-        reinit_model = keras.models.model_from_json(model_json)
-    elif framework == 'torch':
+    
+    if framework == 'torch':
         reinit_model = model.apply(_reset_torch_weights)
 
     return reinit_model

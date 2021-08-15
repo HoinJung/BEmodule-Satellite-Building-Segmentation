@@ -1,36 +1,21 @@
-# model_name: unet
-# model_name: HED
-# model_name: BE_unet
-# model_name: xdxd_BE
-# model_name: resunet
-# model_name: resunet_BE
-# model_name: ternaus
-model_name: ternaus_BE
-# model_path: '../result/models_weight/AOI_3_Paris_1222/final.pth'
+model_name : unet
 model_path: '../result/models_weight/'
-
-training_date : '391718'
+training_date : '1629037296'
 aoi : 6
-# boundary : false
-boundary : true
+boundary : False
 inference:
   window_step_size_x: 
   window_step_size_y: 
   output_dir: '../result/infer/'
-
+weight_file : 'final.pth'
 train: false
 infer: true
-# pretrained: true
 pretrained: false
 nn_framework: torch
-batch_size: 16
+batch_size: 4
 data_specs:
-#   width: 2048
-
-#   height: 2048
   width: 512
   height: 512
-
   dtype:
   image_type: zscore
   rescale: false
@@ -41,7 +26,7 @@ data_specs:
   is_categorical: false
   mask_channels: 1
   val_holdout_frac: 0.1
-  data_workers: 4
+  data_workers:
 
 training_data_csv:
 validation_data_csv:
@@ -55,9 +40,6 @@ validation_augmentation:
   p: 1.0
 inference_augmentation:
   augmentations:
-#     PadIfNeeded :
-#       min_height : 672
-#       min_width : 672
   p: 1.0
 training:
   epochs: 300

@@ -1,24 +1,8 @@
 """Wrappers for training optimizers."""
 import math
 import torch
-from tensorflow import keras
-
 
 def get_optimizer(framework, config):
-    """Get the optimizer specified in config for model training.
-
-    Arguments
-    ---------
-    framework : str
-        Name of the deep learning framework used. Current options are
-        ``['torch', 'keras']``.
-    config : dict
-        The config dict generated from the YAML config file.
-
-    Returns
-    -------
-    An optimizer object for the specified deep learning framework.
-    """
 
     if config['training']['optimizer'] is None:
         raise ValueError('An optimizer must be specified in the config '
@@ -26,36 +10,8 @@ def get_optimizer(framework, config):
 
     if framework in ['torch', 'pytorch']:
         return torch_optimizers.get(config['training']['optimizer'].lower())
-    elif framework == 'keras':
-        return keras_optimizers.get(config['training']['optimizer'].lower())
-
-
+    
 class TorchAdamW(torch.optim.Optimizer):
-    """AdamW algorithm as implemented in `Torch_AdamW`_.
-
-    The original Adam algorithm was proposed in `Adam: A Method for Stochastic Optimization`_.
-    The AdamW variant was proposed in `Decoupled Weight Decay Regularization`_.
-    Arguments:
-        params (iterable): iterable of parameters to optimize or dicts defining
-            parameter groups
-        lr (float, optional): learning rate (default: 1e-3)
-        betas (Tuple[float, float], optional): coefficients used for computing
-            running averages of gradient and its square (default: (0.9, 0.999))
-        eps (float, optional): term added to the denominator to improve
-            numerical stability (default: 1e-8)
-        weight_decay (float, optional): weight decay coefficient (default: 1e-2)
-        amsgrad (boolean, optional): whether to use the AMSGrad variant of this
-            algorithm from the paper `On the Convergence of Adam and Beyond`_
-            (default: False)
-    .. _Torch_AdamW: https://github.com/pytorch/pytorch/pull/3740
-    .. _Adam\: A Method for Stochastic Optimization:
-        https://arxiv.org/abs/1412.6980
-    .. _Decoupled Weight Decay Regularization:
-        https://arxiv.org/abs/1711.05101
-    .. _On the Convergence of Adam and Beyond:
-        https://openreview.net/forum?id=ryQu7f-RZ
-    """
-
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8,
                  weight_decay=1e-2, amsgrad=False):
         if not 0.0 <= lr:
@@ -152,12 +108,3 @@ torch_optimizers = {
     'sgd': torch.optim.SGD,
 }
 
-keras_optimizers = {
-    'adadelta': keras.optimizers.Adadelta,
-    'adagrad': keras.optimizers.Adagrad,
-    'adam': keras.optimizers.Adam,
-    'adamax': keras.optimizers.Adamax,
-    'nadam': keras.optimizers.Nadam,
-    'rmsprop': keras.optimizers.RMSprop,
-    'sgd': keras.optimizers.SGD
-}

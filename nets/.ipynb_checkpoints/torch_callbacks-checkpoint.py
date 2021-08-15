@@ -2,7 +2,7 @@
 
 import os
 import numpy as np
-from .metrics import metric_dict
+
 import torch
 import time
  
@@ -74,37 +74,6 @@ class TorchTerminateOnNaN(object):
             self.counter = 0
 
 
-class TorchTerminateOnMetricNaN(object):
-    """Sets a stop condition if a training metric achieves an NaN or inf value.
-
-    Arguments
-    ---------
-    stopping_metric : str
-        The name of the metric to stop on. The name must match a key in
-        :const:`solaris.nets.metrics.metric_dict` .
-    patience : int, optional
-        The number of epochs that must display an NaN loss value before
-        stopping. Defaults to ``1``.
-    verbose : bool, optional
-        Verbose text output. Defaults to off (``False``). _NOTE_ : This
-        currently does nothing.
-    """
-
-    def __init__(self, stopping_metric, patience=1, verbose=False):
-        self.metric = metric_dict[stopping_metric]
-        self.patience = patience
-        self.counter = 0
-        self.stop = False
-
-    def __call__(self, y_true, y_pred):
-        if np.isinf(self.metric(y_true, y_pred)) or \
-                np.isnan(self.metric(y_true, y_pred)):
-            self.counter += 1
-            if self.counter >= self.patience:
-                self.stop = True
-        else:
-            self.counter = 0
-
 
 class TorchModelCheckpoint(object):
     """Save the model at specific points using Keras checkpointing args.
@@ -160,7 +129,7 @@ class TorchModelCheckpoint(object):
         self.last_epoch = 0
         self.last_saved_value = None
 
-    def __call__(self, model, loss_value=None, y_true=None, y_pred=None):
+    def __call__(self, model, file_path, loss_value=None, y_true=None, y_pred=None):
         """Run a round of model checkpointing for an epoch.
 
         Arguments
@@ -182,7 +151,7 @@ class TorchModelCheckpoint(object):
         if self.monitor == 'periodic': # update based on period
             if self.last_epoch + self.period <= self.epoch:
                 # self.last_saved_value = loss_value if loss_value else 0
-                self.save(model, self.weights_only)
+                self.save(model, file_path,self.weights_only)
                 self.last_epoch = self.epoch
 
 
@@ -190,25 +159,25 @@ class TorchModelCheckpoint(object):
             if self.last_saved_value is None:
                 self.last_saved_value = loss_value
                 if self.last_epoch + self.period <= self.epoch:
-                    self.save(model, self.weights_only)
+                    self.save(model,file_path, self.weights_only)
                     self.last_epoch = self.epoch
             if self.last_epoch + self.period <= self.epoch:
                 if self.check_is_best_value(loss_value):
                     self.last_saved_value = loss_value
-                    self.save(model, self.weights_only)
+                    self.save(model, file_path,self.weights_only)
                     self.last_epoch = self.epoch
 
         else:
             if self.last_saved_value is None:
                 self.last_saved_value = self.monitor(y_true, y_pred)
                 if self.last_epoch + self.period <= self.epoch:
-                    self.save(model, self.weights_only)
+                    self.save(model,file_path, self.weights_only)
                     self.last_epoch = self.epoch
             if self.last_epoch + self.period <= self.epoch:
                 metric_value = self.monitor(y_true, y_pred)
                 if self.check_is_best_value(metric_value):
                     self.last_saved_value = metric_value
-                    self.save(model, self.weights_only)
+                    self.save(model, file_path, self.weights_only)
                     self.last_epoch = self.epoch
 
     def check_is_best_value(self, value):
@@ -220,7 +189,7 @@ class TorchModelCheckpoint(object):
         else:
             return False
 
-    def save(self, model, weights_only):
+    def save(self, model, file_path, weights_only):
         """Save the model.
 
         Arguments
@@ -238,7 +207,8 @@ class TorchModelCheckpoint(object):
 #         print(self.aoi)
 #         print("aoi")
         lossvalue=np.round(self.last_saved_value,3)
-        save_path = self.filepath + self.aoi + '_' + str(now.tm_mon) + str(now.tm_mday)+str(now.tm_hour)+str(now.tm_min)+ '/'
+#         save_path = self.filepath + self.aoi + '_' + str(now.tm_mon) + str(now.tm_mday)+str(now.tm_hour)+str(now.tm_min)+ '/'
+        save_path = file_path
         save_name = save_path + 'best'+ '_epoch{}_{}'.format(self.epoch, str(lossvalue))
         #save_name = save_path + 'best'+ '_epoch_{}_{}'.format( str(self.epoch).zfill(3), str(lossvalue))
         
@@ -273,5 +243,4 @@ torch_callback_dict = {
     "early_stopping": TorchEarlyStopping,
     "model_checkpoint": TorchModelCheckpoint,
     "terminate_on_nan": TorchTerminateOnNaN,
-    "terminate_on_metric_nan": TorchTerminateOnMetricNaN
-}
+    }

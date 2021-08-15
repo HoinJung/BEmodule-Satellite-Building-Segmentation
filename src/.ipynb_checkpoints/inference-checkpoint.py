@@ -1,6 +1,6 @@
 import os
 
-os.environ['CUDA_VISIBLE_DEVICES']='0,1'
+os.environ['CUDA_VISIBLE_DEVICES']='1'
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname("__file__"))))
 
@@ -18,5 +18,4 @@ config = utils.config.parse(config_path)
 
 inferer = nets.infer.Inferer(config)
 inferer()
-print()
 # inferer.Inferer()
