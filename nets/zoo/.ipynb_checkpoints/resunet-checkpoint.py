@@ -4,9 +4,9 @@ import torch.nn.functional as F
 
 
 class ResUnetPlusPlus(nn.Module):
-    def __init__(self,  filters=[32, 64, 128, 256, 512], pretrained=False):
+    def __init__(self,  filters=[32, 64, 128, 256, 512], pretrained=False,mode='Train'):
         super(ResUnetPlusPlus, self).__init__()
-
+        self.mode=mode
         self.input_layer = nn.Sequential(
             nn.Conv2d(3, filters[0], kernel_size=3, padding=1),
             nn.BatchNorm2d(filters[0]),
@@ -78,11 +78,10 @@ class ResUnetPlusPlus(nn.Module):
 
         x9 = self.aspp_out(x8)
         out = self.output_layer(x9)
-        out = F.sigmoid(out)
-
-    
-        return out
-    
+        if self.mode == 'Train':
+            return F.sigmoid(out)
+        elif self.mode == 'Infer':
+            return out
 class ResidualConv(nn.Module):
     def __init__(self, input_dim, output_dim, stride, padding):
         super(ResidualConv, self).__init__()

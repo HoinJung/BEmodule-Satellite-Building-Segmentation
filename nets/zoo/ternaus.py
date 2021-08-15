@@ -45,7 +45,7 @@ class DecoderBlock(nn.Module):
 
 
 class ternaus11(nn.Module):
-    def __init__(self, num_filters: int = 32, pretrained: bool = False) -> None:
+    def __init__(self, num_filters: int = 32, pretrained: bool = False,mode='Train') -> None:
         """
         Args:
             num_filters:
@@ -55,7 +55,7 @@ class ternaus11(nn.Module):
         """
         super().__init__()
         self.pool = nn.MaxPool2d(2, 2)
-
+        self.mode=mode
         self.encoder = models.vgg11(pretrained=pretrained).features
 
         self.relu = self.encoder[1]
@@ -105,9 +105,10 @@ class ternaus11(nn.Module):
         dec2 = self.dec2(torch.cat([dec3, conv2], 1))
         dec1 = self.dec1(torch.cat([dec2, conv1], 1))
         out = self.final(dec1)
-        out = F.sigmoid(out)
-        return out
-
+        if self.mode == 'Train':
+            return F.sigmoid(out)
+        elif self.mode == 'Infer':
+            return out
 
 class Interpolate(nn.Module):
     def __init__(

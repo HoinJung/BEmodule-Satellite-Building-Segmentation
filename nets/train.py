@@ -37,7 +37,10 @@ class Trainer(object):
             self.num_classes = self.config['data_specs']['num_classes']
         except KeyError:
             self.num_classes = 1
-        self.model = get_model(self.model_name, self.framework,
+        self.train_mode = self.config['train']
+        if self.train_mode :
+            self.mode = 'Train'
+        self.model = get_model(self.model_name, self.framework, self.mode, 
                                self.model_path, self.pretrained,
                                custom_model_dict, self.num_classes)
 

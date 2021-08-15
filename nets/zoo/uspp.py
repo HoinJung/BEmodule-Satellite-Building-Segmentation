@@ -84,9 +84,9 @@ class _up(nn.Module):
 
     
 class Uspp(nn.Module):
-    def __init__(self, pretrained=False):
+    def __init__(self, pretrained=False,mode='Train'):
         super(Uspp, self).__init__()
-        
+        self.mode=mode
         self.DCR_block11 = self.make_layer(_stage_block, [  3, 64])
         self.DCR_block12 = self.make_layer(_stage_block, [ 64, 64])
         self.down1 = self.make_layer(_down, 64)
@@ -161,5 +161,7 @@ class Uspp(nn.Module):
         out = torch.cat([conc1, out], 1)
         out = self.DCR_block13(out)
         out = self.DCR_block14(out)
-        out = F.sigmoid(out)
-        return out
+        if self.mode == 'Train':
+            return F.sigmoid(out)
+        elif self.mode == 'Infer':
+            return out

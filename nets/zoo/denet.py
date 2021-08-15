@@ -113,9 +113,9 @@ class _duc(nn.Module):
 
     
 class DeNet(nn.Module):
-    def __init__(self, pretrained=False):
+    def __init__(self, pretrained=False,mode='Train'):
         super(DeNet, self).__init__()
-
+        self.mode=mode
         self.conv_i = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, stride=1, padding=0)
         #self.relu1 = nn.PReLU()
         self.relu1 = nn.ReLU()
@@ -172,5 +172,7 @@ class DeNet(nn.Module):
         
         out = self.relu2(self.conv_f(out))
         out = self.dcu(out)
-        out = F.sigmoid(out)
-        return out
+        if self.mode == 'Train':
+            return F.sigmoid(out)
+        elif self.mode == 'Infer':
+            return out

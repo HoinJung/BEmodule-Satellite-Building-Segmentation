@@ -8,7 +8,7 @@ from nets import weights_dir
 from .zoo import model_dict
 
 
-def get_model(model_name, framework, model_path=None, pretrained=False,
+def get_model(model_name, framework, mode='Train', model_path=None, pretrained=False, 
               custom_model_dict=None, num_classes=1):
     """Load a model from a file based on its name."""
     if custom_model_dict is not None:
@@ -24,7 +24,7 @@ def get_model(model_name, framework, model_path=None, pretrained=False,
         
         model_path = md.get('weight_path')
     if num_classes == 1:
-        model = md.get('arch')(pretrained=pretrained)
+        model = md.get('arch')(pretrained=pretrained, mode=mode)
     else:
         model = md.get('arch')(num_classes=num_classes, pretrained=pretrained)
 

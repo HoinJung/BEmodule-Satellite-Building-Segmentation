@@ -89,8 +89,8 @@ class rrm_module(nn.Module):
         x = x1+x2+x3+x4+x5+x6
         x = self.out(x)
         x = residual + x
-        output = F.sigmoid(x)
-        return output        
+        
+        return x        
     
 class decoder_block(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -107,9 +107,9 @@ class decoder_block(nn.Module):
 
 class BRRNet(nn.Module):
 
-    def __init__(self, n_class=1, pretrained=False):
+    def __init__(self, n_class=1, pretrained=False,mode='Train'):
         super().__init__()
-                
+        self.mode=mode        
         self.dconv_down1 = conv_block(3, 64)
         self.dconv_down2 = conv_block(64, 128)
         self.dconv_down3 = conv_block(128, 256)
@@ -154,4 +154,7 @@ class BRRNet(nn.Module):
         
         x = self.output_1(x)
         out = self.rrm(x)
-        return out
+        if self.mode == 'Train':
+            return F.sigmoid(out)
+        elif self.mode == 'Infer':
+            return out

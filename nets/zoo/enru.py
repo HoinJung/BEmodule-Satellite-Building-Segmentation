@@ -198,38 +198,10 @@ def resnet50(**kwargs):
         pretrained (bool): If True, returns a model pre-trained on Places
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], deep_base=False, **kwargs)
-#     model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
+
     return model
 
-# def BNReLU(num_features, norm_type=None, **kwargs):
-#     if norm_type == 'batchnorm':
-#         return nn.Sequential(
-#             nn.BatchNorm2d(num_features, **kwargs),
-#             nn.ReLU()
-#         )
-#     elif norm_type == 'sync_batchnorm':
-#         from extensions.ops.sync_bn.syncbn import BatchNorm2d
-#         return nn.Sequential(
-#             BatchNorm2d(num_features, **kwargs),
-#             nn.ReLU()
-#         )
-#     elif norm_type == 'encsync_batchnorm':
-#         from encoding.nn import BatchNorm2d
-#         return nn.Sequential(
-#             BatchNorm2d(num_features, **kwargs),
-#             nn.ReLU()
-#         )
-#     elif norm_type == 'instancenorm':
-#         return nn.Sequential(
-#             nn.InstanceNorm2d(num_features, **kwargs),
-#             nn.ReLU()
-#         )
-#     # elif bn_type == 'inplace_abn':
-#     #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
-#     #    return InPlaceABNSync(num_features, **kwargs)
-#     else:
-#         Log.error('Not support BN type: {}.'.format(norm_type))
-#         exit(1)
+
 def bn(num_features):
     return nn.Sequential(
             nn.BatchNorm2d(num_features),
@@ -386,9 +358,9 @@ def double_conv(in_channels, out_channels):
         
         
 class ENRUNet(nn.Sequential):
-    def __init__(self,pretrained=False):
+    def __init__(self,pretrained=False,mode='Train'):
         super(ENRUNet, self).__init__()
-        
+        self.mode=mode
         self.backbone = NormalResnetBackbone(resnet50())
         # low_in_channels, high_in_channels, out_channels, key_channels, value_channels, dropout
         self.dconv_up4 = double_conv(512+256, 256)
@@ -419,7 +391,7 @@ class ENRUNet(nn.Sequential):
         x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         x = self.APNB(x)
         out = self.conv_last(x)
-        out = F.sigmoid(out)
-        
-        return out
-        
+        if self.mode == 'Train':
+            return F.sigmoid(out)
+        elif self.mode == 'Infer':
+            return out

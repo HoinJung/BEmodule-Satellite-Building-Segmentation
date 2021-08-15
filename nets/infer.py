@@ -41,10 +41,10 @@ class Inferer(object):
                 self.model_path = self.config.get('model_path', None) + self.aoi + '_' +self.model_name.split('_')[0]+ '_' + self.date + '/' + self.weight_file
         self.infer_mode = self.config['infer']
         if self.infer_mode :
-            self.infer_mode = 'Infer'
-        self.model = get_model(self.model_name, self.framework,
-                               self.model_path, pretrained=True,
-                               custom_model_dict=custom_model_dict)
+            self.mode = 'Infer'
+        
+        self.model = get_model(self.model_name, self.framework, self.mode,
+                               self.model_path, pretrained=True,  custom_model_dict=custom_model_dict)
         self.window_step_x = self.config['inference'].get('window_step_size_x',
                                                           None)
         self.window_step_y = self.config['inference'].get('window_step_size_y',
