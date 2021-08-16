@@ -69,14 +69,29 @@ cuda >= 10.1
 ## Evaluation
 
 - Open ```/notebook/get_mask_eval.ipynb```.
-
 - Check ```aois``` and ```training date```. ``training date`` is ```TRAINING_ID``` in training procedure.
-
 - Running all cells will create mask image from inferred image.
-
 - Evaluation result will show up comparing ground truth and predicted mask. The result will be saved in ```/result/eval_result/```.
 
-  
+
+
+## Implemented model and dataset
+
+### Model 
+
+- U-Net
+- ResUNet++
+- TernausNet
+- BRR-Net
+- USPP
+- DE-Net
+
+### Dataset
+
+- DeepGlobe Dataset(Vegas, Paris, Shanghai, Khartoum)
+- Urban3D Dataset
+- WHU Dataset(aerial and satellite)
+- Massachusetts Dataset
 
 ## File tree
 
