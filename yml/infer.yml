@@ -1,0 +1,73 @@
+model_name : unet_BE
+model_path: '../result/models_weight/'
+training_date : '1629041688'
+aoi : 6
+boundary : True
+inference:
+  window_step_size_x: 
+  window_step_size_y: 
+  output_dir: '../result/infer/'
+weight_file : 'final.pth'
+train: false
+infer: true
+pretrained: false
+nn_framework: torch
+batch_size: 4
+data_specs:
+  width: 512
+  height: 512
+  dtype:
+  image_type: zscore
+  rescale: false
+  rescale_minima: auto
+  rescale_maxima: auto
+  channels: 3
+  label_type: mask
+  is_categorical: false
+  mask_channels: 1
+  val_holdout_frac: 0.1
+  data_workers:
+
+training_data_csv:
+validation_data_csv:
+inference_data_csv: '../csvs/'
+training_augmentation:
+  augmentations:
+  p: 1.0
+  shuffle: true
+validation_augmentation:
+  augmentations:
+  p: 1.0
+inference_augmentation:
+  augmentations:
+  p: 1.0
+training:
+  epochs: 300
+  steps_per_epoch:
+  optimizer: Adam
+  lr: 1e-4
+  opt_args:
+  loss:
+    bcewithlogits:
+    jaccard:
+  loss_weights:
+    bcewithlogits: 10
+    jaccard: 2.5
+  metrics:
+    training: f1_score
+    validation: f1_score
+  checkpoint_frequency: 10
+  callbacks:
+    early_stopping:
+        patience: 24
+    model_checkpoint:
+      filepath:
+      monitor: val_loss
+    lr_schedule:
+      schedule_type: arbitrary
+      schedule_dict:
+        milestones:
+          - 200
+        gamma: 0.1
+  model_dest_path:
+  verbose: true

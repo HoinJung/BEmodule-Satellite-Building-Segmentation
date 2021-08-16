@@ -8,7 +8,7 @@ import utils
 import time
 os.environ['CUDA_VISIBLE_DEVICES']='0,1'
 
-config_path = '../yml/solaris_train.yml'
+config_path = '../yml/train.yml'
 config = utils.config.parse(config_path)
 
 # make model output dir

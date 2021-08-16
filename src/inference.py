@@ -8,7 +8,7 @@ import nets
 import utils
 
 
-config_path = '../yml/solaris_infer.yml'
+config_path = '../yml/infer.yml'
 config = utils.config.parse(config_path)
 # print('Config:')
 # print(config)
