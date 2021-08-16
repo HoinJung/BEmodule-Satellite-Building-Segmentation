@@ -1,8 +1,8 @@
-model_name : unet
+model_name : unet_BE
 model_path: '../result/models_weight/'
 training_date : '1629037296'
 aoi : 6
-boundary : False
+boundary : True
 inference:
   window_step_size_x: 
   window_step_size_y: 

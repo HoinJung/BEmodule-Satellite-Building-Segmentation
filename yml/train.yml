@@ -69,7 +69,7 @@ inference_augmentation:
     
 # Enough epoch was set, because we use EarlyStopping.
 training:
-  epochs: 3
+  epochs: 10000
   steps_per_epoch:
   optimizer: adam  
   lr: 1e-4
