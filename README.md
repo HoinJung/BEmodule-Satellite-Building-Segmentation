@@ -14,13 +14,10 @@ cuda >= 10.1
 
 ## Data prep
 
-### Urban3D Dataset
+### Urban3D Dataset example
 
-- We prepared Urban3D dataset cropped as 512 X 512 size, and splitted 2,912 and 672 for training and test subset, respectively.
-
-- Unzip the ***tar*** files to root directory.
-
-    tar -zxvf Urban3D_data.tar.gz
+- The experiments were conducted with cropped images as 512 X 512 size, and splitted 2,912 and 672 for training and test subset, respectively.
+- The original dataset can be downloaded [Urban3D](https://github.com/topcoderinc/Urban3d).
 
 - The data should be arranged like this.
 
@@ -137,4 +134,8 @@ cuda >= 10.1
     |-- infer.yml
     `-- train.yml
 ```
+
+## Contribution
+
+This codes are modified and simplified version of [Solaris](https://github.com/CosmiQ/solaris) for my own research.     
 
