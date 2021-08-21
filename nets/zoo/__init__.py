@@ -68,4 +68,12 @@ model_dict = {
         'weight_path':None,
         'weight_url': None,
         'arch': ternaus_BE},
+    'hrnetv2' : {
+        'weight_path':None,
+        'weight_url': None,
+        'arch': hrnetv2},
+    'hrnetv2_BE' : {
+        'weight_path':None,
+        'weight_url': None,
+        'arch': hrnetv2_BE},
 }
