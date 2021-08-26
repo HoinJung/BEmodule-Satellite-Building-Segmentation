@@ -1,6 +1,6 @@
 # Boundary Enhancement Semantic Segmentation for Building Extraction from Remote Sensed Image
 ## Introduction
-This repository includes implementations for binary semantic segmentation, especially for building extraction in satellite images. [Paper](.img/Boundary_Enhancement_Semantic_Segmentation.pdf)
+This repository includes implementations for binary semantic segmentation, especially for building extraction in satellite images. [Paper](./img/Boundary_Enhancement_Semantic_Segmentation.pdf)    
 Furthermore, the boundary enhanced methods (BE module) are also contained in ```/net/zoo/```.
 
 ![HED_unit](./img/HED_unit.png)
